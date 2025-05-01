@@ -39,7 +39,7 @@ peft_config = LoraConfig(
     lora_dropout=0.05,
     r=4,
     bias="none",
-    target_modules=["q_proj", "v_proj"],
+    target_modules=["q_proj", "v_proj"], # 只对Wq_proj和Wv_proj进行LoRA
     task_type="CAUSAL_LM",
 )
 model = get_peft_model(model, peft_config)

@@ -183,6 +183,7 @@ def collate_func(examples, processor):
     # process_vision_info(messages)[0] => [<PIL.Image.Image image mode=RGB size=2044x1372>]
     """
     refering to https://github.com/QwenLM/Qwen/blob/main/finetune.py preprocess function.
+    定位需要supervise(计算loss)的部分,生成对应的labels
     """
     IGNORE_TOKEN_ID = -100
     texts = [
@@ -203,7 +204,7 @@ def collate_func(examples, processor):
     input_ids = batch["input_ids"]
     labels = input_ids.clone() 
     pad_id = processor.tokenizer.pad_token_id
-    labels[labels == pad_id] = IGNORE_TOKEN_ID
+    labels[labels == pad_id] = IGNORE_TOKEN_ID # no loss for pad_id
     if isinstance(processor, Qwen2_5_VLProcessor):
         image_tokens = [151652, 151653, 151655]
     else:
@@ -211,7 +212,7 @@ def collate_func(examples, processor):
             processor.tokenizer.convert_tokens_to_ids(processor.image_token)
         ]
     for tok_id in image_tokens:
-        labels[labels == tok_id] = IGNORE_TOKEN_ID
+        labels[labels == tok_id] = IGNORE_TOKEN_ID # no loss for image tokens
 
     # system/user/assistant segmentation
     im_start_id = processor.tokenizer("<|im_start|>").input_ids[0]
