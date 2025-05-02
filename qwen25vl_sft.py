@@ -7,12 +7,12 @@ from datasets import load_dataset
 from utils.utils import find_files,format_data_chartqa,collate_func,clear_memory
 from transformers import Qwen2_5_VLForConditionalGeneration, AutoTokenizer, AutoProcessor
 
-MODEL_APTH = "/archive/share/cql/LLM-FoR-ALL/mini_vlm/models/qwen2.5vl"
-DATA_PATH = "/archive/share/cql/LLM-FoR-ALL/mini_vlm/data/sft"
-TMP_PATH = "/archive/share/cql/aaa/tmp"
-OUTPUT_PATH = "/archive/share/cql/LLM-FoR-ALL/mini_vlm/results/sft-2"
-SUBSET = -1
-
+MODEL_APTH = "./models/qwen2.5vl"
+DATA_PATH = "./data/sft"
+TMP_PATH = "./tmp"
+OUTPUT_PATH = "./results/sft-2"
+SUBSET = -1 # only use subset of dataset
+# load dataset
 directories = ['data']
 data_files = find_files(directories,DATA_PATH)
 dataset = load_dataset("parquet", data_files=data_files, split='train', cache_dir=TMP_PATH) 
@@ -43,7 +43,7 @@ peft_config = LoraConfig(
     task_type="CAUSAL_LM",
 )
 model = get_peft_model(model, peft_config)
-model.print_trainable_parameters()
+model.print_trainable_parameters() # total 8.2B, 1.2M trainable
 
 training_args = SFTConfig(
     output_dir=OUTPUT_PATH,  
@@ -89,7 +89,7 @@ trainer = SFTTrainer(
     eval_dataset=eval_dataset,
     data_collator=collate_fn,
     peft_config=peft_config,
-    tokenizer=processor.tokenizer,
+    # tokenizer=processor.tokenizer,
 )
 
 trainer.train()

@@ -1,3 +1,8 @@
+data
+tmp
+wandb
+models
+results
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
