@@ -187,14 +187,14 @@ def collate_func(examples, processor):
     """
     IGNORE_TOKEN_ID = -100
     texts = [
-        processor.apply_chat_template(example, tokenize=False) 
+        processor.apply_chat_template(example, tokenize=False) # 将多短对话拼成字符串(带<|imstart|>...<|imend|>)
         for example in examples
     ]
     image_inputs = [
         process_vision_info(example)[0] 
         for example in examples
     ]
-    batch = processor(
+    batch = processor( # processor做tokenize + 图像编码 -> batch
         text=texts,
         images=image_inputs,
         return_tensors="pt",
@@ -226,7 +226,8 @@ def collate_func(examples, processor):
     for b_idx in range(batch_size):
         ids = input_ids[b_idx]
         labs = labels[b_idx]
-
+        # 根据与preprocesss相同的规则，对batch["labels"] ignore
+        # 保留段与段中间的\n不被ignore
         i = 0
         while i < seq_len:
             if ids[i] != im_start_id:
@@ -269,6 +270,7 @@ def collate_func(examples, processor):
                 continue
 
             # seg_role in ["system", "user", "assistant"]
+            # 只保留<|imstart|> <|imend|>, \n 不被ignore
             if seg_role in ["system", "user"]:
                 for _ in range(seg_role_len):
                     if i >= seq_len:
@@ -285,6 +287,7 @@ def collate_func(examples, processor):
                 continue
 
             # seg_role == "assistant"
+            # 除了'assistant\n'等标记，正文都可以学习
             for _ in range(seg_role_len):
                 if i >= seq_len:
                     break
