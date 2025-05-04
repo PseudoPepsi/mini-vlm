@@ -1,12 +1,14 @@
+import random
 import torch
 from qwen_vl_utils import process_vision_info
 from datasets import load_dataset
 from utils.utils import find_files,format_data_chartqa
 from transformers import Qwen2_5_VLForConditionalGeneration, AutoTokenizer, AutoProcessor
 
-MODEL_APTH = "/archive/share/cql/LLM-FoR-ALL/mini_vlm/results/sft-2/checkpoint-500"
-DATA_PATH = "/archive/share/cql/LLM-FoR-ALL/mini_vlm/data/sft"
-TMP_PATH = "/archive/share/cql/aaa/tmp"
+MODEL_APTH = "./models/qwen2.5vl"
+# MODEL_APTH = "./results/sft-2/checkpoint-500"
+DATA_PATH = "./data/sft"
+TMP_PATH = "./tmp"
 SUBSET = -1
 
 directories = ['data']
@@ -27,7 +29,7 @@ model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
     device_map="auto",
     torch_dtype=torch.bfloat16,
 )
-processor = AutoProcessor.from_pretrained("/archive/share/cql/LLM-FoR-ALL/mini_vlm/models/qwen2.5vl")
+processor = AutoProcessor.from_pretrained("./models/qwen2.5vl")
 
 def generate_text_from_sample(model, processor, sample, max_new_tokens=1024, device="cuda"):
     print(sample)
@@ -55,6 +57,8 @@ def generate_text_from_sample(model, processor, sample, max_new_tokens=1024, dev
     )
     return output_text[0]  
 
-output = generate_text_from_sample(model, processor, test_dataset[0])
+x = random.randint(0, len(test_dataset)-1)
+print(f"select test_dataset[{x}]")
+output = generate_text_from_sample(model, processor, test_dataset[x])
 print(output)
-import IPython;IPython.embed()
+# import IPython;IPython.embed()
